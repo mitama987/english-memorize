@@ -107,7 +107,7 @@ export default function BlockCard({
         {block.sentences.map((s, i) => (
           <div
             key={i}
-            className="rounded-xl px-3 py-3 md:px-4 md:py-3 lg:grid lg:grid-cols-2 lg:gap-4 transition"
+            className="rounded-xl px-3 py-3 md:px-4 md:py-3 transition"
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid var(--border-subtle)',
@@ -133,11 +133,8 @@ export default function BlockCard({
             {showJa
               ? s.ja && (
                   <p
-                    className="text-sm md:text-base mt-2 lg:mt-0 lg:border-l lg:pl-4"
-                    style={{
-                      color: 'var(--text-secondary)',
-                      borderColor: 'var(--border-subtle)',
-                    }}
+                    className="text-sm md:text-base mt-2 leading-relaxed"
+                    style={{ color: 'var(--text-secondary)' }}
                   >
                     {s.ja}
                   </p>
@@ -146,11 +143,8 @@ export default function BlockCard({
                   <button
                     type="button"
                     onClick={() => setShowJa(true)}
-                    className="w-full text-left italic text-xs mt-1 lg:mt-0 lg:border-l lg:pl-4 min-h-[32px] flex items-center transition cursor-pointer"
-                    style={{
-                      color: 'var(--text-faint)',
-                      borderColor: 'var(--border-subtle)',
-                    }}
+                    className="w-full text-left italic text-xs mt-2 min-h-[32px] flex items-center transition cursor-pointer"
+                    style={{ color: 'var(--text-faint)' }}
                   >
                     tap to reveal 日本語 →
                   </button>
