@@ -25,8 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: mitama987/ClaudeCompany
-          # NOTE: master にデータがマージされたら ref を消すか 'master' に変更
-          ref: feature/english-learning-setup
+          ref: master
           path: data-source
 
       - name: Setup Node.js
