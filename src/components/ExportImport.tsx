@@ -42,14 +42,14 @@ export default function ExportImport({ topicId, onImported }: Props) {
       <button
         type="button"
         onClick={handleExport}
-        className="px-2.5 py-1 rounded text-xs border border-gray-300 bg-white text-gray-700 hover:border-blue-400"
+        className="min-h-[44px] px-3 py-2 rounded text-sm border border-gray-300 bg-white text-gray-700 hover:border-blue-400"
       >
         Export
       </button>
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="px-2.5 py-1 rounded text-xs border border-gray-300 bg-white text-gray-700 hover:border-blue-400"
+        className="min-h-[44px] px-3 py-2 rounded text-sm border border-gray-300 bg-white text-gray-700 hover:border-blue-400"
       >
         Import
       </button>

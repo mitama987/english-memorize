@@ -38,7 +38,7 @@ export default function AudioPlayer({ src, speed, onSpeedChange, autoplay, onEnd
             key={s}
             type="button"
             onClick={() => onSpeedChange(s)}
-            className={`px-3 py-1 rounded text-sm border transition ${
+            className={`min-h-[44px] px-3 py-2 rounded text-sm border transition ${
               speed === s
                 ? 'bg-blue-600 text-white border-blue-600'
                 : 'bg-white text-gray-800 border-gray-300 hover:border-blue-400'

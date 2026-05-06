@@ -59,31 +59,49 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-baseline gap-2 mb-3 flex-wrap">
-          <span className="font-mono text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-            B{padded}
-          </span>
-          <h3 className="font-semibold">{current.enTitle}</h3>
-          <span className="text-sm text-gray-500">/ {current.jaTitle}</span>
+    <div className="space-y-4 lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:space-y-0 lg:items-start">
+      <div className="space-y-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-5">
+          <div className="flex items-baseline gap-2 mb-3 flex-wrap">
+            <span className="font-mono text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+              B{padded}
+            </span>
+            <h3 className="font-semibold text-base md:text-lg">{current.enTitle}</h3>
+            <span className="text-sm md:text-base text-gray-500">/ {current.jaTitle}</span>
+          </div>
+          <audio ref={audioRef} src={src} onEnded={handleEnded} controls className="w-full" />
+          <p className="text-sm md:text-base text-gray-600 mt-2">
+            残り {loopRemaining} 回 ・ Block {currentIdx + 1} / {blocks.length}
+          </p>
         </div>
-        <audio ref={audioRef} src={src} onEnded={handleEnded} controls className="w-full" />
-        <p className="text-sm text-gray-600 mt-2">
-          残り {loopRemaining} 回 ・ Block {currentIdx + 1} / {blocks.length}
-        </p>
+
+        <details className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
+          <summary className="cursor-pointer text-sm md:text-base text-gray-600">
+            字幕（タップで開く）
+          </summary>
+          <div className="mt-2 space-y-2 text-sm md:text-base">
+            {current.sentences.map((s, i) => (
+              <div key={i}>
+                <p>{s.en}</p>
+                <p className="text-gray-500">{s.ja}</p>
+              </div>
+            ))}
+          </div>
+        </details>
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-3 space-y-3">
+      <aside className="bg-gray-50 rounded-lg p-3 md:p-4 space-y-3 md:space-y-4 lg:sticky lg:top-4 lg:h-fit">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm">繰り返し:</span>
+          <span className="text-sm md:text-base">繰り返し:</span>
           {LOOP_COUNTS.map((n) => (
             <button
               key={n}
               type="button"
               onClick={() => setLoopCount(n)}
-              className={`px-2.5 py-1 rounded text-xs border ${
-                loopCount === n ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300 text-gray-700'
+              className={`min-h-[44px] px-3 py-2 rounded text-sm border ${
+                loopCount === n
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white border-gray-300 text-gray-700'
               }`}
             >
               {n}回
@@ -91,14 +109,16 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
           ))}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm">速度:</span>
+          <span className="text-sm md:text-base">速度:</span>
           {SPEEDS.map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setSpeed(s)}
-              className={`px-2.5 py-1 rounded text-xs border ${
-                speed === s ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300 text-gray-700'
+              className={`min-h-[44px] px-3 py-2 rounded text-sm border ${
+                speed === s
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white border-gray-300 text-gray-700'
               }`}
             >
               {s}x
@@ -109,14 +129,14 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
           <button
             type="button"
             onClick={togglePlay}
-            className="px-4 py-2 rounded bg-blue-600 text-white text-sm font-medium"
+            className="min-h-[44px] px-4 py-2 rounded bg-blue-600 text-white text-sm md:text-base font-medium"
           >
             {isPlaying ? '⏸ 一時停止' : '▶ 再生'}
           </button>
           <button
             type="button"
             onClick={() => setCurrentIdx(0)}
-            className="px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700"
+            className="min-h-[44px] px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700"
           >
             ⏮ 最初
           </button>
@@ -124,7 +144,7 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
             type="button"
             onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
             disabled={currentIdx === 0}
-            className="px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700 disabled:opacity-50"
+            className="min-h-[44px] px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700 disabled:opacity-50"
           >
             ← 前
           </button>
@@ -132,24 +152,12 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
             type="button"
             onClick={() => setCurrentIdx((i) => Math.min(blocks.length - 1, i + 1))}
             disabled={currentIdx === blocks.length - 1}
-            className="px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700 disabled:opacity-50"
+            className="min-h-[44px] px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700 disabled:opacity-50"
           >
             次 →
           </button>
         </div>
-      </div>
-
-      <details className="bg-white rounded-lg border border-gray-200 p-3">
-        <summary className="cursor-pointer text-sm text-gray-600">字幕（タップで開く）</summary>
-        <div className="mt-2 space-y-2 text-sm">
-          {current.sentences.map((s, i) => (
-            <div key={i}>
-              <p>{s.en}</p>
-              <p className="text-gray-500">{s.ja}</p>
-            </div>
-          ))}
-        </div>
-      </details>
+      </aside>
     </div>
   );
 }

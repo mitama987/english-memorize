@@ -16,13 +16,13 @@ const MODES: { id: LearningMode; label: string; emoji: string }[] = [
 
 export default function ModeBar({ mode, onChange }: Props) {
   return (
-    <div className="flex gap-1.5 overflow-x-auto py-2 -mx-3 px-3 scrollbar-none">
+    <div className="flex gap-1.5 overflow-x-auto py-2 -mx-3 px-3 scrollbar-none md:flex-wrap md:overflow-visible md:mx-0 md:px-0">
       {MODES.map((m) => (
         <button
           key={m.id}
           type="button"
           onClick={() => onChange(m.id)}
-          className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border transition ${
+          className={`min-h-[44px] whitespace-nowrap px-3 py-2 rounded-full text-sm border transition ${
             mode === m.id
               ? 'bg-blue-600 text-white border-blue-600'
               : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
