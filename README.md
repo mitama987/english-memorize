@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# English Memorize
 
-## Getting Started
+自己紹介トピックを 20 ブロック単位で暗記する練習用 PWA。Next.js + Tailwind v4 で実装、GitHub Pages にデプロイ。
 
-First, run the development server:
+データソースは別リポ [`mitama987/ClaudeCompany`](https://github.com/mitama987/ClaudeCompany) の `.company/english/`（`.bi.md` + `audio/`）。ビルド時に GitHub Actions が clone してデータを取り込む。
+
+## 機能
+
+| モード | 内容 |
+|---|---|
+| 🎧 判読 | EN 表示 + 音声、JA はタップで表示。シャドーイング向け |
+| 🗣️ 暗唱 | JA 表示、EN は隠して口で言ってからタップで答え合わせ |
+| ▶️ 連続再生 | B01 を N 回 → B02 → … 自動進行。loop 回数 (1/3/5) と速度を選択 |
+| 🔁 ずらし復習 | 「覚えた」してから 1/3/7 日経ったブロックだけ表示する SRS 風 |
+
+3 速度音声（1.0x / 0.75x / 0.5x）、進捗 localStorage 保存、JSON エクスポート/インポート対応。
+
+## ローカル開発
+
+前提:
+- Node.js 20+
+- 隣ディレクトリに ClaudeCompany が clone されていること（`../90_other/ClaudeCompany/`）
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 でアクセス。スマホから LAN テスト:
+```bash
+npm run dev -- --hostname 0.0.0.0
+# → http://192.168.x.x:3000 をスマホで開く
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+データソースのパスは `CLAUDECOMPANY_PATH` 環境変数で上書き可能:
+```bash
+CLAUDECOMPANY_PATH=/path/to/ClaudeCompany npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ビルド
 
-## Learn More
+```bash
+npm run build       # build:data → next build → out/ に静的サイト生成
+npx serve out -l 3001
+```
 
-To learn more about Next.js, take a look at the following resources:
+## デプロイ
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`main` ブランチへの push で `.github/workflows/deploy.yml` が自動実行され GitHub Pages へデプロイ。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+公開先: https://mitama987.github.io/english-memorize/
 
-## Deploy on Vercel
+ClaudeCompany のデータを更新したら（`.bi.md` の追加/編集や `gen_audio.py` での mp3 追加）、それを ClaudeCompany 側に push すれば、こちらの workflow を再実行することで反映される。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 仕組み
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+ClaudeCompany リポ                    english-memorize リポ
+.company/english/                     scripts/build-data.ts
+├── scripts/*.bi.md  ──────parse────→ src/data/topics.json
+└── audio/**/*.mp3   ──────copy─────→ public/audio/
+
+                                      Next.js (static export)
+                                      ├── app/page.tsx           トピック一覧
+                                      └── app/topics/[id]/...    練習画面
+                                              └─ TopicView (5 modes)
+                                              └─ BlockCard / AudioPlayer / ...
+```
+
+## アーキテクチャ
+
+- **データ層**: ビルド時に `.bi.md` をパースして `topics.json` 生成（`scripts/build-data.ts`）
+- **ページ**: App Router、すべて静的エクスポート (`output: 'export'`)
+- **状態**: 各ブロックの「覚えた」状態は localStorage に保存、SSR ではダミー
+- **PWA**: `public/sw.js` がランタイムキャッシュで mp3/HTML/JS/CSS を保持。初回アクセス後はオフラインで動作
+- **GitHub Pages**: `basePath: '/english-memorize'`、`trailingSlash: true`
+
+## 既知の制限
+
+- iOS Safari は SVG `apple-touch-icon` を一部表示しない（Android Chrome は OK）。必要なら PNG 化
+- service worker のスコープは `/english-memorize/` 配下のみ
+- mp3 全部キャッシュすると数百 MB になりうる。スマホストレージに注意
