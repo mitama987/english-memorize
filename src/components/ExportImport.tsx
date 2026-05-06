@@ -8,6 +8,7 @@ import {
   loadTopicProgress,
 } from '@/lib/storage';
 import type { TopicProgress } from '@/lib/types';
+import { DownloadIcon, UploadIcon } from './Icons';
 
 interface Props {
   topicId: string;
@@ -37,20 +38,27 @@ export default function ExportImport({ topicId, onImported }: Props) {
     e.target.value = '';
   };
 
+  const baseClass =
+    'min-h-[40px] inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition cursor-pointer';
+  const baseStyle = {
+    background: 'rgba(255, 255, 255, 0.04)',
+    borderColor: 'var(--border-subtle)',
+    color: 'var(--text-secondary)',
+  };
+
   return (
     <>
-      <button
-        type="button"
-        onClick={handleExport}
-        className="min-h-[44px] px-3 py-2 rounded text-sm border border-gray-300 bg-white text-gray-700 hover:border-blue-400"
-      >
+      <button type="button" onClick={handleExport} className={baseClass} style={baseStyle}>
+        <DownloadIcon className="w-3.5 h-3.5" />
         Export
       </button>
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="min-h-[44px] px-3 py-2 rounded text-sm border border-gray-300 bg-white text-gray-700 hover:border-blue-400"
+        className={baseClass}
+        style={baseStyle}
       >
+        <UploadIcon className="w-3.5 h-3.5" />
         Import
       </button>
       <input

@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Block, Speed } from '@/lib/types';
 import { blockAudioPath } from '@/lib/audioPath';
+import AudioWaveform from './AudioWaveform';
+import {
+  PauseIcon,
+  PlayIcon,
+  SkipBackIcon,
+  SkipForwardIcon,
+  RotateCwIcon,
+} from './Icons';
 
 interface Props {
   topicSlug: string;
@@ -30,11 +38,12 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
     }
   }, [currentIdx, speed]);
 
-  if (blocks.length === 0) return <p className="text-gray-500">No blocks</p>;
+  if (blocks.length === 0) return <p style={{ color: 'var(--text-muted)' }}>No blocks</p>;
 
   const current = blocks[currentIdx];
   const padded = String(current.id).padStart(2, '0');
   const src = blockAudioPath(topicSlug, current.id, current.slug, speed);
+  const totalProgress = ((currentIdx + (loopCount - loopRemaining + 1) / loopCount) / blocks.length) * 100;
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -61,103 +70,223 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
   return (
     <div className="space-y-4 lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:space-y-0 lg:items-start">
       <div className="space-y-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-5">
-          <div className="flex items-baseline gap-2 mb-3 flex-wrap">
-            <span className="font-mono text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-              B{padded}
-            </span>
-            <h3 className="font-semibold text-base md:text-lg">{current.enTitle}</h3>
-            <span className="text-sm md:text-base text-gray-500">/ {current.jaTitle}</span>
+        <div
+          className={`relative rounded-2xl p-5 md:p-7 glass overflow-hidden transition ${
+            isPlaying ? 'glow-brand' : ''
+          }`}
+          style={isPlaying ? { borderColor: 'rgba(217, 70, 239, 0.4)' } : undefined}
+        >
+          {isPlaying && (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(60% 80% at 50% 0%, rgba(217, 70, 239, 0.15), transparent 70%)',
+              }}
+            />
+          )}
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="font-mono text-[11px] tracking-wider px-2 py-0.5 rounded-md"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                B{padded}
+              </span>
+              <span
+                className="text-xs"
+                style={{ color: 'var(--text-faint)' }}
+              >
+                {currentIdx + 1} / {blocks.length}
+              </span>
+              <AudioWaveform active={isPlaying} bars={6} className="ml-auto" />
+            </div>
+
+            <h3
+              className="heading-display text-2xl md:text-3xl mb-1"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {current.enTitle}
+            </h3>
+            <p className="text-sm md:text-base mb-4" style={{ color: 'var(--text-muted)' }}>
+              {current.jaTitle}
+            </p>
+
+            <audio ref={audioRef} src={src} onEnded={handleEnded} preload="metadata" className="hidden" />
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={togglePlay}
+                aria-label={isPlaying ? '一時停止' : '再生'}
+                className="relative shrink-0 w-14 h-14 rounded-full grid place-items-center text-white transition active:scale-95 cursor-pointer"
+                style={{
+                  background: 'var(--grad-brand)',
+                  boxShadow: isPlaying
+                    ? '0 0 32px rgba(217, 70, 239, 0.6), 0 0 64px rgba(139, 92, 246, 0.35)'
+                    : '0 4px 20px rgba(139, 92, 246, 0.45)',
+                }}
+              >
+                {isPlaying ? <PauseIcon className="w-6 h-6" /> : <PlayIcon className="w-6 h-6 ml-0.5" />}
+              </button>
+              <div className="flex-1">
+                <div className="text-xs mb-1.5 font-mono" style={{ color: 'var(--text-muted)' }}>
+                  Loop {loopCount - loopRemaining + 1} / {loopCount} · Block {currentIdx + 1} / {blocks.length}
+                </div>
+                <div
+                  className="h-2 rounded-full overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.06)' }}
+                >
+                  <div
+                    className="h-full transition-all duration-300"
+                    style={{
+                      width: `${totalProgress}%`,
+                      background: 'var(--grad-brand)',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <audio ref={audioRef} src={src} onEnded={handleEnded} controls className="w-full" />
-          <p className="text-sm md:text-base text-gray-600 mt-2">
-            残り {loopRemaining} 回 ・ Block {currentIdx + 1} / {blocks.length}
-          </p>
         </div>
 
-        <details className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
-          <summary className="cursor-pointer text-sm md:text-base text-gray-600">
-            字幕（タップで開く）
+        <details className="rounded-xl p-4 glass">
+          <summary
+            className="cursor-pointer text-sm md:text-base"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            字幕を見る
           </summary>
-          <div className="mt-2 space-y-2 text-sm md:text-base">
+          <div className="mt-3 space-y-3 text-sm md:text-base">
             {current.sentences.map((s, i) => (
-              <div key={i}>
-                <p>{s.en}</p>
-                <p className="text-gray-500">{s.ja}</p>
+              <div key={i} className="rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <p style={{ color: 'var(--text-primary)' }}>{s.en}</p>
+                <p className="mt-1" style={{ color: 'var(--text-muted)' }}>
+                  {s.ja}
+                </p>
               </div>
             ))}
           </div>
         </details>
       </div>
 
-      <aside className="bg-gray-50 rounded-lg p-3 md:p-4 space-y-3 md:space-y-4 lg:sticky lg:top-4 lg:h-fit">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm md:text-base">繰り返し:</span>
+      <aside className="rounded-2xl p-4 md:p-5 glass space-y-4 lg:sticky lg:top-32 lg:h-fit">
+        <Section label="繰り返し">
           {LOOP_COUNTS.map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setLoopCount(n)}
-              className={`min-h-[44px] px-3 py-2 rounded text-sm border ${
-                loopCount === n
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white border-gray-300 text-gray-700'
-              }`}
-            >
+            <PillButton key={n} active={loopCount === n} onClick={() => setLoopCount(n)}>
               {n}回
-            </button>
+            </PillButton>
           ))}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm md:text-base">速度:</span>
+        </Section>
+        <Section label="速度">
           {SPEEDS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setSpeed(s)}
-              className={`min-h-[44px] px-3 py-2 rounded text-sm border ${
-                speed === s
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white border-gray-300 text-gray-700'
-              }`}
-            >
+            <PillButton key={s} active={speed === s} onClick={() => setSpeed(s)}>
               {s}x
-            </button>
+            </PillButton>
           ))}
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="min-h-[44px] px-4 py-2 rounded bg-blue-600 text-white text-sm md:text-base font-medium"
-          >
-            {isPlaying ? '⏸ 一時停止' : '▶ 再生'}
-          </button>
-          <button
-            type="button"
+        </Section>
+
+        <div className="grid grid-cols-3 gap-2">
+          <NavButton
             onClick={() => setCurrentIdx(0)}
-            className="min-h-[44px] px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700"
-          >
-            ⏮ 最初
-          </button>
-          <button
-            type="button"
+            disabled={currentIdx === 0}
+            label="最初"
+            Icon={RotateCwIcon}
+          />
+          <NavButton
             onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
             disabled={currentIdx === 0}
-            className="min-h-[44px] px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700 disabled:opacity-50"
-          >
-            ← 前
-          </button>
-          <button
-            type="button"
+            label="前"
+            Icon={SkipBackIcon}
+          />
+          <NavButton
             onClick={() => setCurrentIdx((i) => Math.min(blocks.length - 1, i + 1))}
             disabled={currentIdx === blocks.length - 1}
-            className="min-h-[44px] px-3 py-2 rounded border border-gray-300 bg-white text-sm text-gray-700 disabled:opacity-50"
-          >
-            次 →
-          </button>
+            label="次"
+            Icon={SkipForwardIcon}
+          />
         </div>
       </aside>
     </div>
+  );
+}
+
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div
+        className="text-[11px] uppercase tracking-wider mb-2 font-semibold"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        {label}
+      </div>
+      <div className="flex flex-wrap gap-1.5">{children}</div>
+    </div>
+  );
+}
+
+function PillButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="min-h-[40px] px-3 py-1.5 rounded-lg text-sm font-medium border transition cursor-pointer"
+      style={
+        active
+          ? {
+              background: 'var(--grad-brand)',
+              color: 'white',
+              borderColor: 'transparent',
+              boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)',
+            }
+          : {
+              background: 'rgba(255,255,255,0.04)',
+              color: 'var(--text-secondary)',
+              borderColor: 'var(--border-subtle)',
+            }
+      }
+    >
+      {children}
+    </button>
+  );
+}
+
+function NavButton({
+  onClick,
+  disabled,
+  label,
+  Icon,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  label: string;
+  Icon: typeof RotateCwIcon;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="min-h-[44px] inline-flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs font-medium border transition disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        borderColor: 'var(--border-subtle)',
+        color: 'var(--text-secondary)',
+      }}
+    >
+      <Icon className="w-4 h-4" />
+      {label}
+    </button>
   );
 }

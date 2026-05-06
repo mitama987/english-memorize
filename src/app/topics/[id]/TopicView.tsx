@@ -17,6 +17,7 @@ import ModeBar from '@/components/ModeBar';
 import ProgressIndicator from '@/components/ProgressIndicator';
 import ExportImport from '@/components/ExportImport';
 import AutoLoopMode from '@/components/AutoLoopMode';
+import { ArrowLeftIcon, RotateCwIcon } from '@/components/Icons';
 
 interface Props {
   topic: Topic;
@@ -71,61 +72,108 @@ export default function TopicView({ topic }: Props) {
     ));
 
   return (
-    <main className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-5 pb-20">
-      <Link href="/" className="text-sm text-gray-500 hover:text-blue-600">
-        ← Topics
+    <main className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-5 pb-24">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1.5 text-sm transition cursor-pointer"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        <ArrowLeftIcon className="w-4 h-4" />
+        Topics
       </Link>
-      <header className="mt-2 mb-3 md:mb-4">
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">{topic.title}</h1>
-        <p className="text-sm md:text-base text-gray-500">{topic.jaTitle}</p>
+
+      <header className="mt-3 mb-4 md:mb-5">
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className="font-mono text-[11px] tracking-wider px-2 py-0.5 rounded-md"
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            {topic.fileId}
+          </span>
+        </div>
+        <h1 className="heading-display text-3xl md:text-4xl lg:text-5xl mb-1">
+          <span className="text-gradient">{topic.title}</span>
+        </h1>
+        <p className="text-sm md:text-base" style={{ color: 'var(--text-muted)' }}>
+          {topic.jaTitle}
+        </p>
       </header>
 
-      <div className="sticky top-0 bg-gray-50 z-10 pb-2 -mx-4 md:-mx-6 px-4 md:px-6 border-b border-gray-200">
+      <div
+        className="sticky top-0 z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 backdrop-blur-xl"
+        style={{
+          background: 'rgba(10, 10, 20, 0.7)',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
         <ProgressIndicator memorized={memorizedCount} total={topic.blocks.length} />
-        <ModeBar mode={mode} onChange={setMode} />
+        <div className="mt-2">
+          <ModeBar mode={mode} onChange={setMode} />
+        </div>
       </div>
 
-      <div className="flex gap-2 mt-3 mb-4 flex-wrap">
-        <ExportImport
-          topicId={topic.fileId}
-          onImported={(p) => setProgress(p)}
-        />
+      <div className="flex gap-2 mt-4 mb-5 flex-wrap items-center">
+        <ExportImport topicId={topic.fileId} onImported={(p) => setProgress(p)} />
         <button
           type="button"
           onClick={handleReset}
-          className="min-h-[44px] px-3 py-2 rounded text-sm border border-gray-300 bg-white text-gray-700 hover:border-red-400"
+          className="min-h-[40px] inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition cursor-pointer"
+          style={{
+            background: 'rgba(255, 255, 255, 0.04)',
+            borderColor: 'var(--border-subtle)',
+            color: 'var(--text-secondary)',
+          }}
         >
-          進捗リセット
+          <RotateCwIcon className="w-3.5 h-3.5" />
+          Reset
         </button>
       </div>
 
       {!mounted ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          Loading...
+        </p>
       ) : mode === 'autoloop' ? (
         <AutoLoopMode topicSlug={topic.slug} blocks={topic.blocks} />
       ) : mode === 'srs' ? (
         <div className="space-y-3 md:space-y-4">
-          <p className="text-sm md:text-base text-gray-600 bg-blue-50 border border-blue-200 rounded px-3 py-2 md:px-4 md:py-3">
-            「覚えた」してから 1 / 3 / 7 日経ったブロックが復習対象です。
+          <p
+            className="text-sm md:text-base rounded-xl px-4 py-3 glass"
+            style={{
+              background: 'var(--grad-brand-soft)',
+              borderColor: 'rgba(139, 92, 246, 0.25)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            「覚えた」してから 1 / 3 / 7 日後に自動表示。
             {dueBlocks.length === 0
-              ? ' 今日は復習対象のブロックはありません。'
-              : ` 今日は ${dueBlocks.length} ブロックが復習対象です。`}
+              ? ' 今日の復習対象はありません。'
+              : ` 今日 ${dueBlocks.length} ブロックが復習対象。`}
           </p>
           {dueBlocks.length === 0 ? (
-            <details className="bg-white border border-gray-200 rounded p-3 md:p-4">
-              <summary className="cursor-pointer text-sm md:text-base text-gray-600">
-                既に覚えた全ブロックの状態を確認
+            <details className="rounded-xl p-4 glass">
+              <summary
+                className="cursor-pointer text-sm md:text-base"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                覚えた全ブロックの状態を確認
               </summary>
-              <ul className="mt-2 space-y-1 text-sm md:text-base">
+              <ul className="mt-3 space-y-1.5 text-sm md:text-base">
                 {topic.blocks
                   .filter((b) => getBlockProgress(progress, b.id).memorized)
                   .map((b) => {
                     const bp = getBlockProgress(progress, b.id);
                     return (
-                      <li key={b.id} className="text-gray-700">
-                        B{String(b.id).padStart(2, '0')} {b.enTitle} —{' '}
-                        <span className="text-gray-500">
-                          {daysSinceReview(bp)} 日前にレビュー
+                      <li key={b.id} style={{ color: 'var(--text-secondary)' }}>
+                        <span className="font-mono text-xs mr-2" style={{ color: 'var(--text-muted)' }}>
+                          B{String(b.id).padStart(2, '0')}
+                        </span>
+                        {b.enTitle} —{' '}
+                        <span style={{ color: 'var(--text-faint)' }}>
+                          {daysSinceReview(bp)} 日前
                         </span>
                       </li>
                     );
@@ -139,8 +187,15 @@ export default function TopicView({ topic }: Props) {
       ) : (
         <div className="space-y-3 md:space-y-4">
           {mode === 'recitation' && (
-            <p className="text-sm md:text-base text-gray-600 bg-amber-50 border border-amber-200 rounded px-3 py-2 md:px-4 md:py-3">
-              暗唱モード: JA を見て EN を口で言ってから、EN ボタンで答え合わせ。
+            <p
+              className="text-sm md:text-base rounded-xl px-4 py-3 glass"
+              style={{
+                background: 'rgba(251, 191, 36, 0.08)',
+                borderColor: 'rgba(251, 191, 36, 0.25)',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              暗唱モード — JA を見て EN を口で言う → EN ボタンで答え合わせ。
             </p>
           )}
           {renderBlocks(topic.blocks)}

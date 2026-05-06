@@ -1,13 +1,13 @@
 {
   "name": "English Memorize",
   "short_name": "Eng Memo",
-  "description": "自己紹介プロファイルを 20 ブロック単位で暗記する練習アプリ",
+  "description": "Memorize yourself. 自己紹介プロファイル17トピック × 約20ブロックを覚える英語学習PWA。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#fafafa",
-  "theme_color": "#2563eb",
+  "background_color": "#0a0a14",
+  "theme_color": "#0a0a14",
   "lang": "ja",
   "icons": [
     {

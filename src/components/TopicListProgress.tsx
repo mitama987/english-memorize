@@ -17,16 +17,27 @@ export default function TopicListProgress({ topicId, total }: Props) {
     setMemorized(count);
   }, [topicId]);
 
-  if (memorized === 0) {
-    return (
-      <span className="inline-block mt-2 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-        0 / {total}
-      </span>
-    );
-  }
+  const pct = total === 0 ? 0 : (memorized / total) * 100;
+
   return (
-    <span className="inline-block mt-2 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-medium">
-      {memorized} / {total} 覚えた
-    </span>
+    <div className="mt-3 space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-mono tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+          {memorized} / {total}
+        </span>
+        <span className="tabular-nums" style={{ color: 'var(--text-faint)' }}>
+          {Math.round(pct)}%
+        </span>
+      </div>
+      <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+        <div
+          className="h-full transition-[width] duration-500"
+          style={{
+            width: `${pct}%`,
+            background: memorized > 0 ? 'var(--grad-brand)' : 'transparent',
+          }}
+        />
+      </div>
+    </div>
   );
 }
