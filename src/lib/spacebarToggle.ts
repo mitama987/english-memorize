@@ -4,11 +4,23 @@
 let activeAudio: HTMLAudioElement | null = null;
 let installed = false;
 
+// 文字入力系の要素にフォーカスがある時だけ「入力中」とみなす。
+// range / checkbox / radio などはスペースで再生トグルさせたいので除外しない。
+const TEXT_INPUT_TYPES = new Set([
+  'text', 'search', 'email', 'url', 'tel', 'password', 'number', 'date', 'datetime-local', 'month', 'week', 'time',
+]);
+
 function isTypingTarget(t: EventTarget | null): boolean {
   const el = t as HTMLElement | null;
   if (!el) return false;
+  if (el.isContentEditable) return true;
   const tag = el.tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+  if (tag === 'TEXTAREA') return true;
+  if (tag === 'INPUT') {
+    const type = (el as HTMLInputElement).type.toLowerCase();
+    return TEXT_INPUT_TYPES.has(type);
+  }
+  return false;
 }
 
 function ensureInstalled() {
