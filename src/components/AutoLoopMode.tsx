@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Block, Speed } from '@/lib/types';
 import { blockAudioPath } from '@/lib/audioPath';
+import { clearActiveAudio, setActiveAudio } from '@/lib/spacebarToggle';
 import AudioWaveform from './AudioWaveform';
 import {
   PauseIcon,
@@ -88,6 +89,13 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [isPlaying, skip]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      clearActiveAudio(audio);
+    };
+  }, []);
+
   if (blocks.length === 0) return <p style={{ color: 'var(--text-muted)' }}>No blocks</p>;
 
   const current_block = blocks[currentIdx];
@@ -98,6 +106,7 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
 
   const togglePlay = () => {
     if (!audioRef.current) return;
+    setActiveAudio(audioRef.current);
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
@@ -169,6 +178,7 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
             <audio
               ref={audioRef}
               src={src}
+              onPlay={(e) => setActiveAudio(e.currentTarget)}
               onEnded={handleEnded}
               onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
               onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}

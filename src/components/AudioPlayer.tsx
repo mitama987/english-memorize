@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Speed } from '@/lib/types';
+import { clearActiveAudio, setActiveAudio } from '@/lib/spacebarToggle';
 import AudioWaveform from './AudioWaveform';
 import { PauseIcon, PlayIcon } from './Icons';
 
@@ -55,9 +56,17 @@ export default function AudioPlayer({
   const toggle = () => {
     const audio = audioRef.current;
     if (!audio) return;
+    setActiveAudio(audio);
     if (audio.paused) audio.play().catch(() => {});
     else audio.pause();
   };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      clearActiveAudio(audio);
+    };
+  }, []);
 
   const seekTo = useCallback((t: number) => {
     const audio = audioRef.current;
@@ -105,7 +114,10 @@ export default function AudioPlayer({
         ref={audioRef}
         src={src}
         preload="metadata"
-        onPlay={() => setPlaying(true)}
+        onPlay={(e) => {
+          setPlaying(true);
+          setActiveAudio(e.currentTarget);
+        }}
         onPause={() => setPlaying(false)}
         onEnded={() => {
           setPlaying(false);
