@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type { LearningMode } from '@/lib/types';
-import { HeadphonesIcon, MicIcon, PlayCircleIcon, RepeatIcon } from './Icons';
+import { HeadphonesIcon, MicIcon, PlayCircleIcon, RepeatIcon, StarFilledIcon } from './Icons';
 
 interface Props {
   mode: LearningMode;
@@ -20,11 +22,16 @@ const MODES: {
   { id: 'srs', label: 'Review', jaDesc: 'ずらし復習', Icon: RepeatIcon },
 ];
 
+const FAVORITE_HREF = '/favorites';
+
 export default function ModeBar({ mode, onChange }: Props) {
+  const pathname = usePathname();
+  const favoriteActive = pathname?.startsWith('/favorites') ?? false;
+
   return (
     <div className="flex gap-1.5 overflow-x-auto py-2 -mx-1 px-1 scrollbar-none md:flex-wrap md:overflow-visible md:mx-0 md:px-0">
       {MODES.map((m) => {
-        const active = mode === m.id;
+        const active = mode === m.id && !favoriteActive;
         const Icon = m.Icon;
         return (
           <button
@@ -53,6 +60,29 @@ export default function ModeBar({ mode, onChange }: Props) {
           </button>
         );
       })}
+      <Link
+        href={FAVORITE_HREF}
+        className={`min-h-[44px] whitespace-nowrap inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border transition cursor-pointer active:scale-[0.97] ${
+          favoriteActive ? 'text-white' : ''
+        }`}
+        style={
+          favoriteActive
+            ? {
+                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                borderColor: 'transparent',
+                boxShadow: '0 4px 14px rgba(251, 191, 36, 0.4)',
+              }
+            : {
+                background: 'rgba(251, 191, 36, 0.08)',
+                borderColor: 'rgba(251, 191, 36, 0.25)',
+                color: '#fbbf24',
+              }
+        }
+      >
+        <StarFilledIcon className="w-4 h-4" />
+        <span className="font-semibold tracking-wide">Favorite</span>
+        <span className="text-[11px] opacity-80 hidden sm:inline">お気に入り</span>
+      </Link>
     </div>
   );
 }
