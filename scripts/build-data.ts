@@ -31,6 +31,7 @@ const SOURCE =
 const SCRIPTS_DIR = path.join(SOURCE, '.company', 'english', 'scripts');
 const AUDIO_DIR = path.join(SOURCE, '.company', 'english', 'audio');
 const OUT_DATA = path.join(ROOT, 'src', 'data', 'topics.json');
+const OVERRIDES_PATH = path.join(ROOT, 'src', 'data', 'simple-overrides.json');
 const OUT_AUDIO = path.join(ROOT, 'public', 'audio');
 
 const BLOCK_HEADING_RE = /^###\s+B(\d+)\.\s+(.+?)\s+\/\s+(.+?)\s*$/;
@@ -121,6 +122,21 @@ function copyDirRecursive(src: string, dest: string): void {
   }
 }
 
+function loadOverrideMap(): Map<string, string> {
+  if (!fs.existsSync(OVERRIDES_PATH)) return new Map();
+  try {
+    const raw = fs.readFileSync(OVERRIDES_PATH, 'utf8');
+    const parsed = JSON.parse(raw) as { overrides?: Record<string, string> };
+    const map = new Map<string, string>();
+    for (const [k, v] of Object.entries(parsed.overrides ?? {})) {
+      if (typeof v === 'string' && v.trim()) map.set(k, v);
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 function loadPreviousSimpleMap(): Map<string, string> {
   if (!fs.existsSync(OUT_DATA)) return new Map();
   try {
@@ -151,6 +167,7 @@ function main(): void {
     process.exit(1);
   }
 
+  const overrides = loadOverrideMap();
   const previousSimple = loadPreviousSimpleMap();
 
   const files = fs
@@ -159,11 +176,19 @@ function main(): void {
     .sort();
   const topics = files.map((f) => parseBiMd(path.join(SCRIPTS_DIR, f)));
 
+  let overrideCount = 0;
   let preservedCount = 0;
   for (const t of topics) {
     for (const b of t.blocks) {
       for (const s of b.sentences) {
-        const prev = previousSimple.get(`${t.fileId}|${b.id}|${s.en}`);
+        const key = `${t.fileId}|${b.id}|${s.en}`;
+        const ov = overrides.get(key);
+        if (ov) {
+          s.enSimple = ov;
+          overrideCount++;
+          continue;
+        }
+        const prev = previousSimple.get(key);
         if (prev) {
           s.enSimple = prev;
           preservedCount++;
@@ -174,6 +199,9 @@ function main(): void {
 
   fs.mkdirSync(path.dirname(OUT_DATA), { recursive: true });
   fs.writeFileSync(OUT_DATA, JSON.stringify({ topics }, null, 2));
+  if (overrideCount > 0) {
+    console.log(`[build-data] applied simple-overrides for ${overrideCount} sentence(s)`);
+  }
   if (preservedCount > 0) {
     console.log(`[build-data] preserved enSimple for ${preservedCount} sentence(s)`);
   }
