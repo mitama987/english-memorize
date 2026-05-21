@@ -70,7 +70,7 @@ export default function TopicView({ topic }: Props) {
     [topic.blocks, progress]
   );
 
-  const showEnByDefault = mode !== 'recitation';
+  const showDailyByDefault = mode !== 'recitation';
   const showJaByDefault = mode === 'recitation';
 
   const renderBlocks = (blocks: typeof topic.blocks) =>
@@ -81,7 +81,7 @@ export default function TopicView({ topic }: Props) {
         block={block}
         progress={getBlockProgress(progress, block.id)}
         onToggleMemorized={() => handleToggleMemorized(block.id)}
-        showEnByDefault={showEnByDefault}
+        showDailyByDefault={showDailyByDefault}
         showJaByDefault={showJaByDefault}
         isFavorited={isFavorite(favorites, topic.fileId, block.id)}
         onToggleFavorite={() => handleToggleFavorite(block.id)}

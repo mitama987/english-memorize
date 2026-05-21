@@ -182,7 +182,7 @@ export default function FavoritesView({ topics }: Props) {
                     block={block}
                     progress={getBlockProgress(tp, block.id)}
                     onToggleMemorized={() => handleToggleMemorized(topic.fileId, block.id)}
-                    showEnByDefault
+                    showDailyByDefault
                     showJaByDefault={false}
                     isFavorited
                     onToggleFavorite={() => handleToggleFavorite(topic.fileId, block.id)}

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { Block, BlockProgress, Speed } from '@/lib/types';
-import { blockAudioPath } from '@/lib/audioPath';
+import { blockAudioPath, type AudioVariant } from '@/lib/audioPath';
 import AudioPlayer from './AudioPlayer';
 import ConfettiBurst from './ConfettiBurst';
 import { CheckIcon, StarIcon, StarFilledIcon } from './Icons';
@@ -12,7 +12,8 @@ interface Props {
   block: Block;
   progress: BlockProgress;
   onToggleMemorized: () => void;
-  showEnByDefault: boolean;
+  showDailyByDefault: boolean;
+  showLongByDefault?: boolean;
   showJaByDefault: boolean;
   defaultSpeed?: Speed;
   isFavorited?: boolean;
@@ -24,22 +25,26 @@ export default function BlockCard({
   block,
   progress,
   onToggleMemorized,
-  showEnByDefault,
+  showDailyByDefault,
+  showLongByDefault = false,
   showJaByDefault,
   defaultSpeed = 1.0,
   isFavorited = false,
   onToggleFavorite,
 }: Props) {
+  const hasAnyDaily = block.sentences.some((s) => s.enSimple);
+
   const [speed, setSpeed] = useState<Speed>(defaultSpeed);
-  const [showEn, setShowEn] = useState(showEnByDefault);
+  const [showDaily, setShowDaily] = useState(showDailyByDefault && hasAnyDaily);
+  const [showLong, setShowLong] = useState(showLongByDefault || !hasAnyDaily);
   const [showJa, setShowJa] = useState(showJaByDefault);
-  const [showSimple, setShowSimple] = useState(false);
-  const hasAnySimple = block.sentences.some((s) => s.enSimple);
   const [playing, setPlaying] = useState(false);
   const [confettiTrigger, setConfettiTrigger] = useState(0);
+  const [audioFallback, setAudioFallback] = useState(false);
   const prevMemorized = useRef(progress.memorized);
 
-  useEffect(() => setShowEn(showEnByDefault), [showEnByDefault]);
+  useEffect(() => setShowDaily(showDailyByDefault && hasAnyDaily), [showDailyByDefault, hasAnyDaily]);
+  useEffect(() => setShowLong(showLongByDefault || !hasAnyDaily), [showLongByDefault, hasAnyDaily]);
   useEffect(() => setShowJa(showJaByDefault), [showJaByDefault]);
 
   useEffect(() => {
@@ -50,7 +55,13 @@ export default function BlockCard({
   }, [progress.memorized]);
 
   const padded = String(block.id).padStart(2, '0');
-  const src = blockAudioPath(topicSlug, block.id, block.slug, speed);
+  const variant: AudioVariant = showLong || audioFallback || !hasAnyDaily ? 'long' : 'daily';
+  const src = blockAudioPath(topicSlug, block.id, block.slug, speed, variant);
+
+  // Retry daily when conditions change (user toggles off Long, etc.)
+  useEffect(() => {
+    setAudioFallback(false);
+  }, [showLong, speed, block.id]);
 
   return (
     <article
@@ -134,87 +145,96 @@ export default function BlockCard({
         speed={speed}
         onSpeedChange={setSpeed}
         onPlayingChange={setPlaying}
+        onError={() => {
+          if (variant === 'daily') setAudioFallback(true);
+        }}
       />
+      {variant === 'long' && hasAnyDaily && audioFallback && !showLong && (
+        <p
+          className="text-[11px] mt-1.5"
+          style={{ color: 'var(--text-faint)' }}
+        >
+          Daily 音声が見つからないため Long 音声で再生中
+        </p>
+      )}
 
       <div className="my-4 space-y-2 md:space-y-3">
-        {block.sentences.map((s, i) => (
-          <div
-            key={i}
-            className="rounded-xl px-3 py-3 md:px-4 md:py-3 transition"
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid var(--border-subtle)',
-            }}
-          >
-            {showEn ? (
-              <p
-                className="text-base md:text-lg leading-relaxed font-medium"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {s.en}
-              </p>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowEn(true)}
-                className="w-full text-left italic text-sm min-h-[44px] flex items-center transition hover:opacity-100 cursor-pointer"
-                style={{ color: 'var(--text-faint)' }}
-              >
-                tap to reveal English →
-              </button>
-            )}
-            {showSimple && s.enSimple && (
-              <p
-                className="text-sm md:text-base mt-1.5 leading-relaxed italic"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                <span
-                  className="font-mono text-[10px] tracking-wider mr-2 px-1.5 py-0.5 rounded"
-                  style={{
-                    background: 'rgba(251, 191, 36, 0.12)',
-                    color: '#fbbf24',
-                    fontStyle: 'normal',
-                  }}
+        {block.sentences.map((s, i) => {
+          const primaryText = s.enSimple ?? s.en;
+          const showLongLine = showLong && Boolean(s.en) && s.en !== primaryText;
+          return (
+            <div
+              key={i}
+              className="rounded-xl px-3 py-3 md:px-4 md:py-3 transition"
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              {showDaily ? (
+                <p
+                  className="text-base md:text-lg leading-relaxed font-medium"
+                  style={{ color: 'var(--text-primary)' }}
                 >
-                  DAILY
-                </span>
-                {s.enSimple}
-              </p>
-            )}
-            {showJa
-              ? s.ja && (
-                  <p
-                    className="text-sm md:text-base mt-2 leading-relaxed"
-                    style={{ color: 'var(--text-secondary)' }}
+                  {primaryText}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowDaily(true)}
+                  className="w-full text-left italic text-sm min-h-[44px] flex items-center transition hover:opacity-100 cursor-pointer"
+                  style={{ color: 'var(--text-faint)' }}
+                >
+                  tap to reveal English →
+                </button>
+              )}
+              {showLongLine && (
+                <p
+                  className="text-sm md:text-base mt-2 leading-relaxed italic"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <span
+                    className="font-mono text-[10px] tracking-wider mr-2 px-1.5 py-0.5 rounded"
+                    style={{
+                      background: 'rgba(217, 70, 239, 0.12)',
+                      color: '#d946ef',
+                      fontStyle: 'normal',
+                    }}
                   >
-                    {s.ja}
-                  </p>
-                )
-              : s.ja && (
-                  <button
-                    type="button"
-                    onClick={() => setShowJa(true)}
-                    className="w-full text-left italic text-xs mt-2 min-h-[32px] flex items-center transition cursor-pointer"
-                    style={{ color: 'var(--text-faint)' }}
-                  >
-                    tap to reveal 日本語 →
-                  </button>
-                )}
-          </div>
-        ))}
+                    LONG
+                  </span>
+                  {s.en}
+                </p>
+              )}
+              {showJa
+                ? s.ja && (
+                    <p
+                      className="text-sm md:text-base mt-2 leading-relaxed"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {s.ja}
+                    </p>
+                  )
+                : s.ja && (
+                    <button
+                      type="button"
+                      onClick={() => setShowJa(true)}
+                      className="w-full text-left italic text-xs mt-2 min-h-[32px] flex items-center transition cursor-pointer"
+                      style={{ color: 'var(--text-faint)' }}
+                    >
+                      tap to reveal 日本語 →
+                    </button>
+                  )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex justify-between items-center pt-3 gap-2 flex-wrap" style={{ borderTop: '1px solid var(--border-subtle)' }}>
         <div className="flex gap-1.5 flex-wrap">
-          <ToggleChip label="EN" active={showEn} onClick={() => setShowEn((v) => !v)} />
+          <ToggleChip label="EN" active={showDaily} onClick={() => setShowDaily((v) => !v)} />
+          <ToggleChip label="Long" active={showLong} onClick={() => setShowLong((v) => !v)} />
           <ToggleChip label="JA" active={showJa} onClick={() => setShowJa((v) => !v)} />
-          {hasAnySimple && (
-            <ToggleChip
-              label="Daily"
-              active={showSimple}
-              onClick={() => setShowSimple((v) => !v)}
-            />
-          )}
         </div>
         <button
           type="button"
