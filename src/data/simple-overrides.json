@@ -1,0 +1,63 @@
+{
+  "_doc": "Daily-conversational version of each English sentence. Keyed by \"<topic.fileId>|<block.id>|<sentence.en>\". Merged into topics.json by scripts/build-data.ts. Generated/edited by hand or via scripts/generate-simple.ts.",
+  "overrides": {
+    "01|1|So, where do I start?": "Let me tell you a bit about myself.",
+    "01|1|I was born in 1989, in a small town called Oizumi in Gunma Prefecture, about an hour and a half north of Tokyo.": "I was born in 1989 in a small town called Oizumi, in Gunma. It's about an hour and a half north of Tokyo.",
+
+    "01|2|I was a pretty quiet kid — nothing flashy about me — and honestly, I spent most of my time on video games and studying.": "I was a quiet kid. I spent most of my time playing video games and studying.",
+
+    "01|3|I went through elementary, middle, and high school all in Gunma.": "I went to elementary school, junior high, and high school all in Gunma.",
+    "01|3|Never moved, never transferred.": "I never moved or changed schools.",
+
+    "01|4|I didn't join any club at school either.": "I didn't join any club at school.",
+    "01|4|I was what we call a \"go-home club\" kid, but instead of actually going home, I'd head straight to the arcade.": "I was basically a \"go-home club\" kid, but instead of going home, I went straight to the arcade.",
+
+    "01|5|I was really into fighting games back then — Marvel vs. Capcom 2 and King of Fighters were my main ones.": "I was really into fighting games back then, mostly Marvel vs. Capcom 2 and King of Fighters.",
+    "01|5|Pretty niche, I know.": "It's a pretty niche hobby, I know.",
+
+    "01|6|One thing that shaped that whole period was my health, actually.": "My health really shaped that part of my life.",
+    "01|6|I had this lung condition called pneumothorax, and between middle school and high school, I had surgery seven times — a mix of thoracoscopic and open-chest surgery.": "I had a lung condition called pneumothorax, and I had surgery seven times between junior high and high school. Some were keyhole surgery, some were open-chest.",
+    "01|6|I was in and out of the hospital all the time.": "I was in and out of the hospital all the time.",
+
+    "01|7|It's all healed up now, no follow-ups, totally fine, but yeah, it was a big part of growing up.": "I'm completely healed now, no check-ups needed, but it was a big part of growing up.",
+
+    "01|8|For university, I went to Waseda University in Tokyo, and I studied resources and environmental engineering.": "I went to Waseda University in Tokyo and studied resources and environmental engineering.",
+
+    "01|9|To be honest, though, I actually wanted to go into IT since high school.": "I'd actually wanted to work in IT since high school.",
+    "01|9|My first choice was the industrial and management systems department, but I didn't make the cut, so I ended up in resources engineering instead.": "My first choice was industrial and management systems, but I didn't get in, so I ended up in resources engineering.",
+
+    "01|10|I stayed on for a master's degree and joined a lab focused on petroleum research.": "I stayed for a master's degree and joined a lab focused on petroleum research.",
+    "01|10|My main project was rock failure testing — basically, breaking rocks to measure how strong they are.": "My main project was rock failure testing — basically breaking rocks to measure how strong they are.",
+
+    "01|11|I built my own original testing rig to get more accurate readings, and then fed those parameters into simulations.": "I built my own testing rig to get better data, and then used those numbers in simulations.",
+
+    "01|12|I also worked on this calibration method where I'd measure rock hardness every meter using a simpler, faster tool, and then convert those hardness values into proper strength values from compression tests.": "I also worked on a calibration method. We measured rock hardness every meter with a quick, simple tool, and then converted those values into proper strength numbers.",
+    "01|12|A single strength test takes over an hour per sample, but a hardness measurement only takes about a minute.": "A strength test takes over an hour per sample, but a hardness check only takes about a minute.",
+    "01|12|So instead of spending 100 hours to get 100 data points, we could cover the same ground in about 10 hours.": "So instead of 100 hours for 100 data points, we could do it in about 10 hours.",
+    "01|12|That was actually a really fun project.": "It was a really fun project.",
+
+    "01|13|After my master's, I joined an oil and gas company — the same company I'm still with today.": "After my master's, I joined an oil and gas company. I'm still with the same company today.",
+    "01|13|My first assignment was on-site in Akita, which is up in the north of Japan, just below Hokkaido.": "My first job was on-site in Akita, up in the north of Japan, just below Hokkaido.",
+
+    "01|14|I was doing well inspections — opening and closing valves to adjust oil production rates based on supply and demand, and a thing called sand production analysis, where you simulate how much you can produce before the rock around the well starts breaking down.": "I did well inspections — opening and closing valves to adjust oil output based on supply and demand. I also did sand production analysis, which means simulating how much you can produce before the rock around the well starts to break down.",
+    "01|14|I spent three years out there.": "I spent three years out there.",
+
+    "01|15|Then I transferred to the technical research center in Chiba, and I spent five years there.": "Then I moved to the technical research center in Chiba, and I spent five years there.",
+    "01|15|I went deeper into sand production work — modeling actual real-world wells and running simulations to figure out the optimal production rate.": "I went deeper into sand production work — modeling real wells and running simulations to find the best production rate.",
+
+    "01|16|The work itself was solid, but somewhere in those Chiba years, I started getting kind of anxious about my future.": "The work was good, but during those years in Chiba, I started getting anxious about my future.",
+    "01|16|Like, am I really going to be an oil engineer for the rest of my career?": "I kept asking myself if I really wanted to be an oil engineer for the rest of my career.",
+
+    "01|17|And honestly, since high school I'd always wanted to be in IT, so that itch just kind of came back.": "I'd wanted to work in IT since high school, and that feeling came back.",
+    "01|17|I started a side project building social media automation tools, and that pulled me back into the IT world for real.": "I started a side project building social media automation tools, and that pulled me back into IT for real.",
+
+    "01|18|Eventually, I made an internal transfer to the IT department, which is now called the Digital Strategy Division.": "Eventually I transferred internally to the IT department, which is now called the Digital Strategy Division.",
+    "01|18|These days I build automation tools to make business processes more efficient, and I'm leading the rollout of generative AI and AI agents across the company.": "These days I build automation tools to make our work more efficient, and I'm leading the rollout of generative AI and AI agents across the company.",
+
+    "01|19|So all in all, I've been at this company for 11 years now — three years in Akita, five years in Chiba, and the rest in the Digital Strategy Division.": "All in all, I've been at this company for 11 years now — three in Akita, five in Chiba, and the rest in the Digital Strategy Division.",
+
+    "01|20|If I had to put my philosophy into one line: I'm going all in on earning money the smart way.": "If I had to sum up my philosophy in one line: I'm fully focused on making money the smart way.",
+    "01|20|The goal is to hit 100 million yen and build real wealth.": "My goal is to hit 100 million yen and build real wealth.",
+    "01|20|That's where I'm pointed.": "That's the direction I'm headed."
+  }
+}
