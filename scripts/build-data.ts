@@ -5,6 +5,7 @@ import matter from 'gray-matter';
 interface Sentence {
   en: string;
   ja: string;
+  enSimple?: string;
 }
 
 interface Block {
@@ -120,6 +121,27 @@ function copyDirRecursive(src: string, dest: string): void {
   }
 }
 
+function loadPreviousSimpleMap(): Map<string, string> {
+  if (!fs.existsSync(OUT_DATA)) return new Map();
+  try {
+    const raw = fs.readFileSync(OUT_DATA, 'utf8');
+    const parsed = JSON.parse(raw) as { topics: Topic[] };
+    const map = new Map<string, string>();
+    for (const t of parsed.topics ?? []) {
+      for (const b of t.blocks ?? []) {
+        for (const s of b.sentences ?? []) {
+          if (s.enSimple) {
+            map.set(`${t.fileId}|${b.id}|${s.en}`, s.enSimple);
+          }
+        }
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 function main(): void {
   console.log(`[build-data] source = ${SOURCE}`);
   if (!fs.existsSync(SCRIPTS_DIR)) {
@@ -129,14 +151,32 @@ function main(): void {
     process.exit(1);
   }
 
+  const previousSimple = loadPreviousSimpleMap();
+
   const files = fs
     .readdirSync(SCRIPTS_DIR)
     .filter((f) => f.endsWith('.bi.md'))
     .sort();
   const topics = files.map((f) => parseBiMd(path.join(SCRIPTS_DIR, f)));
 
+  let preservedCount = 0;
+  for (const t of topics) {
+    for (const b of t.blocks) {
+      for (const s of b.sentences) {
+        const prev = previousSimple.get(`${t.fileId}|${b.id}|${s.en}`);
+        if (prev) {
+          s.enSimple = prev;
+          preservedCount++;
+        }
+      }
+    }
+  }
+
   fs.mkdirSync(path.dirname(OUT_DATA), { recursive: true });
   fs.writeFileSync(OUT_DATA, JSON.stringify({ topics }, null, 2));
+  if (preservedCount > 0) {
+    console.log(`[build-data] preserved enSimple for ${preservedCount} sentence(s)`);
+  }
   const blockCount = topics.reduce((n, t) => n + t.blocks.length, 0);
   console.log(
     `[build-data] wrote ${path.relative(ROOT, OUT_DATA)} (${topics.length} topic(s), ${blockCount} block(s))`

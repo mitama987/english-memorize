@@ -5,7 +5,7 @@ import type { Block, BlockProgress, Speed } from '@/lib/types';
 import { blockAudioPath } from '@/lib/audioPath';
 import AudioPlayer from './AudioPlayer';
 import ConfettiBurst from './ConfettiBurst';
-import { CheckIcon } from './Icons';
+import { CheckIcon, StarIcon, StarFilledIcon } from './Icons';
 
 interface Props {
   topicSlug: string;
@@ -15,6 +15,8 @@ interface Props {
   showEnByDefault: boolean;
   showJaByDefault: boolean;
   defaultSpeed?: Speed;
+  isFavorited?: boolean;
+  onToggleFavorite?: () => void;
 }
 
 export default function BlockCard({
@@ -25,10 +27,14 @@ export default function BlockCard({
   showEnByDefault,
   showJaByDefault,
   defaultSpeed = 1.0,
+  isFavorited = false,
+  onToggleFavorite,
 }: Props) {
   const [speed, setSpeed] = useState<Speed>(defaultSpeed);
   const [showEn, setShowEn] = useState(showEnByDefault);
   const [showJa, setShowJa] = useState(showJaByDefault);
+  const [showSimple, setShowSimple] = useState(false);
+  const hasAnySimple = block.sentences.some((s) => s.enSimple);
   const [playing, setPlaying] = useState(false);
   const [confettiTrigger, setConfettiTrigger] = useState(0);
   const prevMemorized = useRef(progress.memorized);
@@ -90,6 +96,33 @@ export default function BlockCard({
             覚えた
           </span>
         )}
+        {onToggleFavorite && (
+          <button
+            type="button"
+            onClick={onToggleFavorite}
+            aria-pressed={isFavorited}
+            aria-label={isFavorited ? 'お気に入りから外す' : 'お気に入りに追加'}
+            className="grid place-items-center w-9 h-9 rounded-full transition active:scale-95 cursor-pointer"
+            style={
+              isFavorited
+                ? {
+                    background: 'rgba(251, 191, 36, 0.15)',
+                    color: '#fbbf24',
+                  }
+                : {
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    color: 'var(--text-faint)',
+                    border: '1px solid var(--border-subtle)',
+                  }
+            }
+          >
+            {isFavorited ? (
+              <StarFilledIcon className="w-4 h-4" />
+            ) : (
+              <StarIcon className="w-4 h-4" />
+            )}
+          </button>
+        )}
       </header>
 
       <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
@@ -130,6 +163,24 @@ export default function BlockCard({
                 tap to reveal English →
               </button>
             )}
+            {showSimple && s.enSimple && (
+              <p
+                className="text-sm md:text-base mt-1.5 leading-relaxed italic"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                <span
+                  className="font-mono text-[10px] tracking-wider mr-2 px-1.5 py-0.5 rounded"
+                  style={{
+                    background: 'rgba(251, 191, 36, 0.12)',
+                    color: '#fbbf24',
+                    fontStyle: 'normal',
+                  }}
+                >
+                  DAILY
+                </span>
+                {s.enSimple}
+              </p>
+            )}
             {showJa
               ? s.ja && (
                   <p
@@ -154,9 +205,16 @@ export default function BlockCard({
       </div>
 
       <div className="flex justify-between items-center pt-3 gap-2 flex-wrap" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap">
           <ToggleChip label="EN" active={showEn} onClick={() => setShowEn((v) => !v)} />
           <ToggleChip label="JA" active={showJa} onClick={() => setShowJa((v) => !v)} />
+          {hasAnySimple && (
+            <ToggleChip
+              label="Daily"
+              active={showSimple}
+              onClick={() => setShowSimple((v) => !v)}
+            />
+          )}
         </div>
         <button
           type="button"

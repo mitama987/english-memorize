@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import type { LearningMode, Topic, TopicProgress } from '@/lib/types';
+import type { FavoritesState, LearningMode, Topic, TopicProgress } from '@/lib/types';
 import {
   emptyProgress,
   getBlockProgress,
@@ -11,6 +11,13 @@ import {
   resetProgress,
   unmarkMemorized,
 } from '@/lib/storage';
+import {
+  emptyFavorites,
+  isFavorite,
+  loadFavorites,
+  subscribeFavorites,
+  toggleFavorite,
+} from '@/lib/favorites';
 import { isDueForReview, daysSinceReview } from '@/lib/srs';
 import BlockCard from '@/components/BlockCard';
 import ModeBar from '@/components/ModeBar';
@@ -27,16 +34,24 @@ export default function TopicView({ topic }: Props) {
   const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<LearningMode>('shadowing');
   const [progress, setProgress] = useState<TopicProgress>(() => emptyProgress(topic.fileId));
+  const [favorites, setFavorites] = useState<FavoritesState>(() => emptyFavorites());
 
   useEffect(() => {
     setMounted(true);
     setProgress(loadTopicProgress(topic.fileId));
+    setFavorites(loadFavorites());
+    const unsub = subscribeFavorites(() => setFavorites(loadFavorites()));
+    return unsub;
   }, [topic.fileId]);
 
   const memorizedCount = useMemo(
     () => Object.values(progress.blocks).filter((b) => b.memorized).length,
     [progress]
   );
+
+  const handleToggleFavorite = (blockId: number) => {
+    setFavorites(toggleFavorite(favorites, topic.fileId, blockId));
+  };
 
   const handleToggleMemorized = (blockId: number) => {
     const cur = getBlockProgress(progress, blockId);
@@ -68,6 +83,8 @@ export default function TopicView({ topic }: Props) {
         onToggleMemorized={() => handleToggleMemorized(block.id)}
         showEnByDefault={showEnByDefault}
         showJaByDefault={showJaByDefault}
+        isFavorited={isFavorite(favorites, topic.fileId, block.id)}
+        onToggleFavorite={() => handleToggleFavorite(block.id)}
       />
     ));
 

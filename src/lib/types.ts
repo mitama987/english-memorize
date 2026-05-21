@@ -1,6 +1,7 @@
 export interface Sentence {
   en: string;
   ja: string;
+  enSimple?: string;
 }
 
 export interface Block {
@@ -33,6 +34,16 @@ export interface TopicProgress {
   topicId: string;
   blocks: Record<number, BlockProgress>;
   updatedAt: number;
+}
+
+export interface FavoriteEntry {
+  topicId: string;
+  blockId: number;
+  addedAt: number;
+}
+
+export interface FavoritesState {
+  entries: FavoriteEntry[];
 }
 
 export type Speed = 1.0 | 0.75 | 0.5;

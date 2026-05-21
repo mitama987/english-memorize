@@ -9,9 +9,11 @@
     "prebuild": "tsx scripts/build-data.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gen:simple": "tsx scripts/generate-simple.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.1",
     "gray-matter": "^4.0.3",
     "next": "16.2.4",
     "react": "19.2.4",

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getAllTopics } from '@/lib/topics';
 import TopicListProgress from '@/components/TopicListProgress';
 import StatsHero from '@/components/StatsHero';
+import FavoritesNavBadge from '@/components/FavoritesNavBadge';
 import { SparklesIcon } from '@/components/Icons';
 
 export default function Home() {
@@ -10,12 +11,15 @@ export default function Home() {
   return (
     <main className="max-w-2xl md:max-w-5xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-12 pb-20">
       <header className="mb-8 md:mb-12">
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 glass"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          <SparklesIcon className="w-3.5 h-3.5" style={{ color: '#d946ef' }} />
-          <span>17 topics × ~20 blocks each</span>
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium glass"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <SparklesIcon className="w-3.5 h-3.5" style={{ color: '#d946ef' }} />
+            <span>17 topics × ~20 blocks each</span>
+          </div>
+          <FavoritesNavBadge />
         </div>
         <h1 className="heading-display text-4xl md:text-6xl lg:text-7xl mb-3">
           Memorize<br />
