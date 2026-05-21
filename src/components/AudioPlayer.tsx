@@ -13,6 +13,7 @@ interface Props {
   autoplay?: boolean;
   onEnded?: () => void;
   onPlayingChange?: (playing: boolean) => void;
+  onError?: () => void;
   compact?: boolean;
 }
 
@@ -33,6 +34,7 @@ export default function AudioPlayer({
   autoplay,
   onEnded,
   onPlayingChange,
+  onError,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -125,6 +127,10 @@ export default function AudioPlayer({
         }}
         onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onError={() => {
+          setPlaying(false);
+          onError?.();
+        }}
         className="hidden"
       />
 

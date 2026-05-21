@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Block, Speed } from '@/lib/types';
-import { blockAudioPath } from '@/lib/audioPath';
+import { blockAudioPath, type AudioVariant } from '@/lib/audioPath';
 import { clearActiveAudio, setActiveAudio } from '@/lib/spacebarToggle';
 import AudioWaveform from './AudioWaveform';
 import {
@@ -34,6 +34,8 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
   const [loopCount, setLoopCount] = useState(3);
   const [loopRemaining, setLoopRemaining] = useState(3);
   const [speed, setSpeed] = useState<Speed>(1.0);
+  const [variant, setVariant] = useState<AudioVariant>('daily');
+  const [audioFallback, setAudioFallback] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -49,7 +51,11 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
     if (isPlaying && audioRef.current) {
       audioRef.current.play().catch(() => {});
     }
-  }, [currentIdx, speed]);
+  }, [currentIdx, speed, variant]);
+
+  useEffect(() => {
+    setAudioFallback(false);
+  }, [variant, currentIdx, speed]);
 
   const seekTo = useCallback((t: number) => {
     const audio = audioRef.current;
@@ -100,7 +106,10 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
 
   const current_block = blocks[currentIdx];
   const padded = String(current_block.id).padStart(2, '0');
-  const src = blockAudioPath(topicSlug, current_block.id, current_block.slug, speed);
+  const hasAnyDailyHere = current_block.sentences.some((s) => s.enSimple);
+  const effectiveVariant: AudioVariant =
+    variant === 'long' || audioFallback || !hasAnyDailyHere ? 'long' : 'daily';
+  const src = blockAudioPath(topicSlug, current_block.id, current_block.slug, speed, effectiveVariant);
   const totalProgress = ((currentIdx + (loopCount - loopRemaining + 1) / loopCount) / blocks.length) * 100;
   const blockPct = duration > 0 ? (current / duration) * 100 : 0;
 
@@ -182,6 +191,10 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
               onEnded={handleEnded}
               onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
               onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+              onError={() => {
+                setIsPlaying(false);
+                if (effectiveVariant === 'daily') setAudioFallback(true);
+              }}
               preload="metadata"
               className="hidden"
             />
@@ -287,14 +300,23 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
             字幕を見る
           </summary>
           <div className="mt-3 space-y-3 text-sm md:text-base">
-            {current_block.sentences.map((s, i) => (
-              <div key={i} className="rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                <p style={{ color: 'var(--text-primary)' }}>{s.en}</p>
-                <p className="mt-1" style={{ color: 'var(--text-muted)' }}>
-                  {s.ja}
-                </p>
-              </div>
-            ))}
+            {current_block.sentences.map((s, i) => {
+              const primary = effectiveVariant === 'long' ? s.en : s.enSimple ?? s.en;
+              const secondary = effectiveVariant === 'long' ? null : s.en !== primary ? s.en : null;
+              return (
+                <div key={i} className="rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <p style={{ color: 'var(--text-primary)' }}>{primary}</p>
+                  {secondary && (
+                    <p className="mt-1 italic text-xs" style={{ color: 'var(--text-faint)' }}>
+                      Long: {secondary}
+                    </p>
+                  )}
+                  <p className="mt-1" style={{ color: 'var(--text-muted)' }}>
+                    {s.ja}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </details>
       </div>
@@ -313,6 +335,14 @@ export default function AutoLoopMode({ topicSlug, blocks }: Props) {
               {s}x
             </PillButton>
           ))}
+        </Section>
+        <Section label="音声">
+          <PillButton active={variant === 'daily'} onClick={() => setVariant('daily')}>
+            EN (Daily)
+          </PillButton>
+          <PillButton active={variant === 'long'} onClick={() => setVariant('long')}>
+            Long
+          </PillButton>
         </Section>
 
         <div className="grid grid-cols-3 gap-2">
