@@ -19,7 +19,7 @@
 
 前提:
 - Node.js 20+
-- 隣ディレクトリに ClaudeCompany が clone されていること（`../90_other/ClaudeCompany/`）
+- ClaudeCompany が clone されていること（work の形なら `../../10_ops/10_ClaudeCompany/` を自動で見つける。別の場所なら環境変数 `CLAUDECOMPANY_PATH`）
 
 ```bash
 npm install
@@ -80,3 +80,7 @@ ClaudeCompany リポ                    english-memorize リポ
 - iOS Safari は SVG `apple-touch-icon` を一部表示しない（Android Chrome は OK）。必要なら PNG 化
 - service worker のスコープは `/english-memorize/` 配下のみ
 - mp3 全部キャッシュすると数百 MB になりうる。スマホストレージに注意
+
+## Version History
+
+- ver1.1 (2026-11-25): 前提の ClaudeCompany の場所を今の work の形に合わせた（`scripts/build-data.ts` ver1.1）

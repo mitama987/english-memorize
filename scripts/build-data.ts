@@ -25,9 +25,15 @@ interface Topic {
 }
 
 const ROOT = process.cwd();
+// ClaudeCompany の場所: 環境変数 → work の今の形（1_own\55_media から見て ..\..\10_ops）→ 2026-11-03〜11-25 の形（隣）
+const SOURCE_CANDIDATES = [
+  path.resolve(ROOT, '..', '..', '10_ops', '10_ClaudeCompany'),
+  path.resolve(ROOT, '..', '10_ClaudeCompany'),
+];
 const SOURCE =
   process.env.CLAUDECOMPANY_PATH ||
-  path.resolve(ROOT, '..', '90_other', 'ClaudeCompany');
+  SOURCE_CANDIDATES.find((p) => fs.existsSync(p)) ||
+  SOURCE_CANDIDATES[0];
 const SCRIPTS_DIR = path.join(SOURCE, '.company', 'english', 'scripts');
 const AUDIO_DIR = path.join(SOURCE, '.company', 'english', 'audio');
 const OUT_DATA = path.join(ROOT, 'src', 'data', 'topics.json');
@@ -162,7 +168,7 @@ function main(): void {
   console.log(`[build-data] source = ${SOURCE}`);
   if (!fs.existsSync(SCRIPTS_DIR)) {
     console.error(
-      `[build-data] ERROR: ${SCRIPTS_DIR} not found. Set CLAUDECOMPANY_PATH or place ClaudeCompany at ../90_other/ClaudeCompany/`
+      `[build-data] ERROR: ${SCRIPTS_DIR} not found. Set CLAUDECOMPANY_PATH or place ClaudeCompany at ../../10_ops/10_ClaudeCompany/`
     );
     process.exit(1);
   }
@@ -220,3 +226,6 @@ function main(): void {
 }
 
 main();
+
+// Version History
+// ver1.1 (2026-11-25): ClaudeCompany の既定の場所を今の work の形に（候補を順に探す）。旧 ../90_other/ClaudeCompany は 2026-11-03 の改名から無かった
